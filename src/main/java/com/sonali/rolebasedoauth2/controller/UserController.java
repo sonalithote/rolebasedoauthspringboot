@@ -2,6 +2,7 @@ package com.sonali.rolebasedoauth2.controller;
 
 import com.sonali.rolebasedoauth2.dto.ApiResponse;
 import com.sonali.rolebasedoauth2.dto.UserDto;
+import com.sonali.rolebasedoauth2.model.User;
 import com.sonali.rolebasedoauth2.service.AuthenticationFacadeService;
 import com.sonali.rolebasedoauth2.service.UserService;
 import org.slf4j.Logger;
@@ -46,6 +47,16 @@ public class UserController {
     public ApiResponse getUser(@PathVariable long id){
         log.info(String.format("received request to update user %s", authenticationFacadeService.getAuthentication().getPrincipal()));
         return new ApiResponse(HttpStatus.OK, SUCCESS, userService.findOne(id));
+    }
+
+    @Secured({ROLE_ADMIN, ROLE_USER})
+    @GetMapping(value = "by/{name}")
+    public ApiResponse getUser(@PathVariable String name){
+        log.info(String.format("received request to update user %s", authenticationFacadeService.getAuthentication().getPrincipal()));
+        User user = userService.findByEmailOrUsername(name);
+        if(user == null){ return new ApiResponse(HttpStatus.ACCEPTED,"ACCEPTED", "No Data found related to the specified user.");
+        }
+        return new ApiResponse(HttpStatus.OK, SUCCESS, user);
     }
 
     @Secured({ROLE_ADMIN})

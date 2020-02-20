@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -41,12 +43,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
         User user = userDao.findByUsername(userId);
+
         if(user == null){
             log.error("Invalid username or password.");
             throw new UsernameNotFoundException("Invalid username or password.");
         }
         Set<GrantedAuthority> grantedAuthorities = getAuthorities(user);
-
 
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities);
     }
@@ -71,6 +73,18 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     public void delete(long id) {
         userDao.deleteById(id);
+    }
+
+    @Override
+    public User findByEmailOrUsername(String name){
+        User user;
+        String regex = "^(.+)@(.+)$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(name);
+        if(matcher.matches()) { user = userDao.findByEmail(name);
+        }else { user = userDao.findByUsername(name);
+        }
+        return user;
     }
 
     @Override

@@ -10,5 +10,6 @@ public interface UserService {
     UserDto save(UserDto user);
     List<UserDto> findAll();
     User findOne(long id);
+    User findByEmailOrUsername(String name);
     void delete(long id);
 }
